@@ -8,7 +8,7 @@ name = ''
 surname = ''
 age = 0
 try:
-    sqlite_connection = sqlite3.connect('TestTGBot.db')
+    sqlite_connection = sqlite3.connect('C:/Users/Админ/PycharmProjects/first/TelegramBot/TestTGBotDataBase.db')
     sqlite_create_table_query = '''CREATE TABLE sqlitedb_developers (
                                 id INTEGER PRIMARY KEY,
                                 name TEXT NOT NULL,
