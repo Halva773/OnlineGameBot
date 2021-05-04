@@ -1,39 +1,31 @@
 import telebot
 from telebot import types
 import sqlite3
+import random
 
-bot = telebot.TeleBot('1795726860:AAHVQZgmXGW-ns5Xqp349yt53A-6NgefToI')
+
+bot = telebot.TeleBot('token')
 
 name = ''
 surname = ''
 age = 0
-try:
-    sqlite_connection = sqlite3.connect('C:/Users/Админ/PycharmProjects/first/TelegramBot/TestTGBotDataBase.db')
-    sqlite_create_table_query = '''CREATE TABLE sqlitedb_developers (
-                                id INTEGER PRIMARY KEY,
-                                name TEXT NOT NULL,
-                                surname TEXT NOT NULL,
-                                age INTEGER);'''
 
-    cursor = sqlite_connection.cursor()
-    print("База данных подключена к SQLite")
-    cursor.execute(sqlite_create_table_query)
-    sqlite_connection.commit()
-    print("Таблица SQLite создана")
-
-    cursor.close()
-
-except sqlite3.Error as error:
-    print("Ошибка при подключении к sqlite", error)
-finally:
-    if (sqlite_connection):
-        sqlite_connection.close()
-        print("Соединение с SQLite закрыто")
-
+def addInDB(id, name, surname, age):
+    with sqlite3.connect("TestTGBotDataBase.db") as con:
+        cur = con.cursor()
+        cur.execute("INSERT INTO sqlitedb_developers VALUES (?, ?, ?, ?)", (id, name, surname, age))
+        con.commit()
+def findNameWithID(id):
+    with sqlite3.connect("TestTGBotDataBase.db") as con:
+        cur = con.cursor()
+        row = cur.execute("SELECT * FROM sqlitedb_developers WHERE id = id")
+    return next(row)
 
 @bot.message_handler(content_types=['text'])
 def start(message):
-    if message.text == '/reg':
+    if message.text == '/start':
+        bot.send_message(message.from_user.id, "Привет, " + str(message.from_user.first_name) + ". Это мой первый (не умерший на стадии запроса API) бот на Python. Я собираюсь тут тестить и изучать всякие фишки и добавлять новый функционал. Можешь написать /reg, чтобы занести свои данные ко мне в базу))")
+    elif message.text == '/reg':
         bot.send_message(message.from_user.id, "Как тебя зовут?")
         bot.register_next_step_handler(message, get_name)  # следующий шаг – функция get_name
     else:
@@ -73,7 +65,11 @@ def get_age(message):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
     if call.data == "yes":  # call.data это callback_data, которую мы указали при объявлении кнопки
-        bot.send_message(call.message.chat.id, 'Запомню : )')
+        try:
+            addInDB(call.message.chat.id, name, surname, age)
+            bot.send_message(call.message.chat.id, 'Запомню : )')
+        except Exception:
+            bot.send_message(call.message.chat.id, 'Эй! Регестрироваться можно только 1 раз')
     elif call.data == "no":
         bot.send_message(call.message.chat.id, 'Давай заново, напиши /reg')
 
