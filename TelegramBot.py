@@ -18,13 +18,16 @@ def addInDB(id, name, surname, age):
 def findNameWithID(id):
     with sqlite3.connect("TestTGBotDataBase.db") as con:
         cur = con.cursor()
-        row = cur.execute("SELECT * FROM sqlitedb_developers WHERE id = id")
+        row = cur.execute("SELECT * FROM sqlitedb_developers WHERE id = ?", (id, ))
     return next(row)
 
 @bot.message_handler(content_types=['text'])
 def start(message):
-    if message.text == '/start':
-        bot.send_message(message.from_user.id, "Привет, " + str(message.from_user.first_name) + ". Это мой первый (не умерший на стадии запроса API) бот на Python. Я собираюсь тут тестить и изучать всякие фишки и добавлять новый функционал. Можешь написать /reg, чтобы занести свои данные ко мне в базу))")
+    if message.text == '/start' or message.text == 'Привет':
+        try:
+            bot.send_message(message.chat.id, "Привет, " + findNameWithID(message.chat.id)[1] + ". Это мой первый (не умерший на стадии запроса токена) бот на Python. Я собираюсь тут тестить и изучать всякие фишки и добавлять новый функционал. Можешь написать /reg, чтобы занести свои данные ко мне в базу))")
+        except Exception:
+            bot.send_message(message.chat.id,'Я посмортю, ты у нас тут в первый раз!? Круто! Это мой первый (не умерший на стадии запроса токена) бот на Python. Я собираюсь тут тестить и изучать всякие фишки и добавлять новый функционал. Можешь написать /reg, чтобы занести свои данные ко мне в базу))')
     elif message.text == '/reg':
         bot.send_message(message.from_user.id, "Как тебя зовут?")
         bot.register_next_step_handler(message, get_name)  # следующий шаг – функция get_name
