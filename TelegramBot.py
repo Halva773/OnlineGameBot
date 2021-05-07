@@ -5,7 +5,7 @@ import random
 import time
 import logging
 
-bot = telebot.TeleBot('1795726860:AAHVQZgmXGW-ns5Xqp349yt53A-6NgefToI')
+bot = telebot.TeleBot('token')
 
 name = ''
 nick = ''
